@@ -1,11 +1,9 @@
 "use strict"
-
-
 const music      =  require("musicmatch")();
 const crypto     =  require("crypto");
 const fs         =  require("fs");
 const path       =  require("path");
-
+const has        =  require("mout/object/has");
 const LyricsPath =  "lyrics";
 
 class Lyrics {
@@ -22,32 +20,38 @@ class Lyrics {
     return path.join(LyricsPath , this.nameHash)
   }
   getLyrics(){
+    var self = this ;
     return new Promise(function(resolve, reject) {
-      this._readLocal()
+      self._readLocal()
         .then(resolve)
         .catch(function(){
-          this._readRemote()
-          .then(function(){
-            this.data.lyrics = data;
-            this.saveLyrics();
-            this._readLocal()
-              .then(resolve)
-              .catch(reject)
+          self._readRemote()
+          .then(function(data){
+            if(has(data, 'message.body.lyrics.lyrics_body')){
+              self.data.lyrics = data.message.body.lyrics.lyrics_body;
+              self._saveLyrics();
+              self._readLocal()
+                .then(resolve)
+                .catch(reject)
+            }else{
+              reject(Error("cant find message.body.lyrics.lyrics_body"))
+            }
           })
           .catch(reject)
         })
     })
   }
   _readLocal(){
+    var self = this;
     return new Promise(function(resolve, reject){
-      if(this._checkLocal()){
-        fs.readFile(this._getFilePath(), (err, data) => {
+      if(self._checkLocal()){
+        fs.readFile(self._getFilePath(), (err, data) => {
           if(err)
             reject(err);
           else{
             try{
               let d = JSON.parse(data);
-              resolve(data);
+              resolve(d);
             }catch(e){
               reject(e)
             }
@@ -60,13 +64,20 @@ class Lyrics {
   }
 
   _saveLyrics(){
+    console.log(this._getFilePath())
     if(this.data.lyrics)
-      fs.writeFileSync(this._getFilePath(), this.data);
+      fs.writeFileSync(this._getFilePath(), JSON.stringify(this.data));
   }
 
-  checkLocal(){
-      var filePath = path.join(LyricsPath , this.nameHash)
-      return fs.accessSync(filePath, fs.R_OK);
+  _checkLocal(){
+    var filePath = path.join(LyricsPath , this.nameHash)
+    try{
+      fs.accessSync(filePath, fs.R_OK);
+      return true
+    }catch(e){
+      return false
+    }
   }
 };
 
+module.exports = Lyrics

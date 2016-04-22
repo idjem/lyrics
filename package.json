@@ -1,0 +1,15 @@
+{
+  "name": "lyrics",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mejdi Ourir <mejdi.ourir@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "mout": "^1.0.0",
+    "musicmatch": "^0.2.5"
+  }
+}
