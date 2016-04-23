@@ -1,6 +1,7 @@
 var Lyrics = require("./");
 
-new Lyrics("sexy and i know it" , "lmfao").getLyrics()
+
+new Lyrics("Higher Place" , "Dimitri Vegas").getLyrics()
   .then(function(data){
     console.log(data)
   })

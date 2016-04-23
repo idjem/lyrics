@@ -4,16 +4,18 @@ const crypto     =  require("crypto");
 const fs         =  require("fs");
 const path       =  require("path");
 const has        =  require("mout/object/has");
+const deepMixIn  =  require("mout/object/deepMixIn")
 const LyricsPath =  "lyrics";
 
 class Lyrics {
   constructor(name, artist) {
-      this.name     = name;
-      this.artist   = artist;
+      this.name     = name.toUpperCase();
+      this.artist   = artist.toUpperCase();
       this.data     = {};
-      this.nameHash = crypto.createHash('md5').update(name+artist).digest('hex');
+      this.nameHash = crypto.createHash('md5').update(this.name + this.artist).digest('hex');
   }
   _readRemote(){
+    console.log("check it remotely")
     return music.matcherLyrics({q_track: this.name , q_artist: this.artist})
   }
   _getFilePath(){
@@ -64,7 +66,7 @@ class Lyrics {
   }
 
   _saveLyrics(){
-    console.log(this._getFilePath())
+    console.log("save lyrics locally")
     if(this.data.lyrics)
       fs.writeFileSync(this._getFilePath(), JSON.stringify(this.data));
   }
@@ -77,6 +79,13 @@ class Lyrics {
     }catch(e){
       return false
     }
+  }
+
+  updateLyrics(data){
+    if(!data)
+      return
+    this.data = deepMixIn(data , this.data);
+    this._saveLyrics();
   }
 };
 
